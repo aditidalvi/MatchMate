@@ -10,20 +10,21 @@ import SwiftUI
 struct ContentView: View {
     @StateObject var viewModel: ContentViewModel
     var body: some View {
-        VStack {
-            Text(viewModel.title)
-                .font(.title)
-                .fontWeight(.bold)
-            ProfileCardView(cardViewModel: ProfileCardViewModel(image: UIImage(systemName: "rectangle.fill")!,
-                                                                name: "Florenece Gagne",
-                                                                detail: "43, Keswick, Yukon"))
-            .padding(.vertical, 20)
-            .padding(.horizontal, 40)
-            .background(.white)
-            .cornerRadius(12)
-            .shadow(radius: 10.0)
+        ScrollView {
+            VStack(spacing: 30) {
+                Text(viewModel.title)
+                    .font(.title)
+                    .fontWeight(.bold)
+                ForEach(viewModel.profileViewModels, id: \.self) { cardViewModel in
+                    ProfileCardView(cardViewModel: cardViewModel)
+                        .frame(width: UIScreen.main.bounds.width - 80, height: 320)
+                        .background(.white)
+                        .cornerRadius(12)
+                        .shadow(radius: 8.0)
+                }
+            }
+            .padding()
         }
-        .padding()
     }
 }
 

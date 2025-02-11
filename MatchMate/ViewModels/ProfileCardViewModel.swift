@@ -9,14 +9,14 @@ import Foundation
 import UIKit
 
 struct ProfileCardViewModel: Hashable {
-    let image: UIImage
+    let imageUrl: URL?
     let name: String
     let detail: String
     
-    init(image: UIImage,
+    init(image: String,
          name: String,
          detail: String) {
-        self.image = image
+        self.imageUrl = URL(string: image)
         self.name = name
         self.detail = detail
     }
