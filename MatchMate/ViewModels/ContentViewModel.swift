@@ -48,6 +48,7 @@ class ContentViewModel: ObservableObject {
                 newProfile.country = profile.location.country
                 newProfile.name = "\(profile.name.first) \(profile.name.last)"
                 newProfile.imageUrl = URL(string: profile.picture.large)
+                newProfile.status = ProfileMatchState.none.self.rawValue
                 try? container.viewContext.save()
             }
             setUpProfileViewModels(profiles: fetchDataFromDB())
@@ -76,7 +77,24 @@ class ContentViewModel: ObservableObject {
             for profile in profiles {
                 if let profileCardViewModel = ProfileCardViewModel(image: profile.imageUrl,
                                                                    name: profile.name,
-                                                                   detail: "\(profile.age),\(String(describing: profile.city ?? "")),\(String(describing: profile.country ?? ""))") {
+                                                                   detail: "\(profile.age),\(String(describing: profile.city ?? "")),\(String(describing: profile.country ?? ""))",
+                                                                   status: ProfileMatchState(rawValue: profile.status ?? "") ?? .none,
+                                                                   tapAction: {[weak self] value, id in
+                    do {
+                        let request = NSFetchRequest<ProfileEntity>(entityName: "ProfileEntity")
+                        let results = try self?.container.viewContext.fetch(request)
+                        if let objectToUpdate = results?.first(where: {
+                            $0.name == id
+                        }) {
+                            // Proceed to update the attribute
+                            objectToUpdate.status = value.self.rawValue
+                            try? self?.container.viewContext.save()
+                        }
+                    } catch {
+                        print("Failed to fetch object: \(error)")
+                    }
+                }) {
+                    print("Match state is \(profile.status)")
                     profileViewModels.append(profileCardViewModel)
                 }
             }

@@ -5,7 +5,7 @@
         <attribute name="city" optional="YES" attributeType="String"/>
         <attribute name="country" optional="YES" attributeType="String"/>
         <attribute name="imageUrl" optional="YES" attributeType="URI"/>
-        <attribute name="matchState" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="name" optional="YES" attributeType="String"/>
+        <attribute name="status" optional="YES" attributeType="String"/>
     </entity>
 </model>
