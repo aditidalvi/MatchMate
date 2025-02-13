@@ -10,6 +10,7 @@ import CoreData
 
 class ContentViewModel: ObservableObject {
     let title: String = "Profile Matches"
+    @Published var isFetchingData: Bool = true
     let container: NSPersistentContainer
     @Published var profileViewModels: [ProfileCardViewModel] = []
     
@@ -99,6 +100,7 @@ class ContentViewModel: ObservableObject {
                 }
             }
             DispatchQueue.main.async(execute: {[weak self] in
+                self?.isFetchingData = false
                 self?.profileViewModels = profileViewModels
             })
         }
