@@ -6,16 +6,55 @@
 //
 
 import Foundation
+import CoreData
 
 class ContentViewModel: ObservableObject {
     let title: String = "Profile Matches"
+    let container: NSPersistentContainer
     @Published var profileViewModels: [ProfileCardViewModel] = []
     
     init() {
-        fetchData()
+        container = NSPersistentContainer(name: "ProfileInfo")
+        container.loadPersistentStores(completionHandler: { [weak self] (description, error) in
+            if let error {
+                print("eror loading coredata: \(error)")
+            } else {
+                let entities = self?.fetchDataFromDB()
+                if entities?.isEmpty == true {
+                    self?.fetchDataFromApi()
+                } else {
+                    self?.setUpProfileViewModels(profiles: entities)
+                }
+            }
+        })
     }
     
-    func fetchData() {
+    func fetchDataFromDB() -> [ProfileEntity]? {
+        let request = NSFetchRequest<ProfileEntity>(entityName: "ProfileEntity")
+        do {
+            return try container.viewContext.fetch(request)
+        } catch let error {
+            print("Error fetching \(error)")
+            return nil
+        }
+    }
+    
+    func addDataToDatabase(_ data: ProfileCardModel?) {
+        if let results = data?.results {
+            for profile in results {
+                let newProfile = ProfileEntity(context: container.viewContext)
+                newProfile.age = Int64(profile.dob.age)
+                newProfile.city = profile.location.city
+                newProfile.country = profile.location.country
+                newProfile.name = "\(profile.name.first) \(profile.name.last)"
+                newProfile.imageUrl = URL(string: profile.picture.large)
+                try? container.viewContext.save()
+            }
+            setUpProfileViewModels(profiles: fetchDataFromDB())
+        }
+    }
+    
+    func fetchDataFromApi() {
         guard let url = URL(string: "https://randomuser.me/api/?results=10") else {
             assertionFailure("Invalid url.")
             return
@@ -27,18 +66,19 @@ class ContentViewModel: ObservableObject {
                 return
             }
             let profile = try? JSONDecoder().decode(ProfileCardModel.self, from: data)
-            self?.setUpProfileViewModels(profileModel: profile)
+            self?.addDataToDatabase(profile)
         }).resume()
     }
     
-    func setUpProfileViewModels(profileModel: ProfileCardModel?) {
-        if let results = profileModel?.results {
+    func setUpProfileViewModels(profiles: [ProfileEntity]?) {
+        if let profiles {
             var profileViewModels: [ProfileCardViewModel] = []
-            for profile in results {
-                let profileCardViewModel = ProfileCardViewModel(image: profile.picture.large,
-                                                                name: "\(profile.name.first) \(profile.name.last)",
-                                                                detail: "\(profile.dob.age),\(profile.location.city),\(profile.location.country)")
-                profileViewModels.append(profileCardViewModel)
+            for profile in profiles {
+                if let profileCardViewModel = ProfileCardViewModel(image: profile.imageUrl,
+                                                                   name: profile.name,
+                                                                   detail: "\(profile.age),\(String(describing: profile.city ?? "")),\(String(describing: profile.country ?? ""))") {
+                    profileViewModels.append(profileCardViewModel)
+                }
             }
             DispatchQueue.main.async(execute: {[weak self] in
                 self?.profileViewModels = profileViewModels

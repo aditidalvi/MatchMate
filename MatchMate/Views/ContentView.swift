@@ -17,7 +17,8 @@ struct ContentView: View {
                     .fontWeight(.bold)
                 ForEach(viewModel.profileViewModels, id: \.self) { cardViewModel in
                     ProfileCardView(cardViewModel: cardViewModel)
-                        .frame(width: UIScreen.main.bounds.width - 80, height: 320)
+                        .padding()
+                        .frame(width: UIScreen.main.bounds.width - 80)
                         .background(.white)
                         .cornerRadius(12)
                         .shadow(radius: 8.0)

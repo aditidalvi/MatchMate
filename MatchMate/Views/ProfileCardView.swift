@@ -13,7 +13,6 @@ struct ProfileCardView: View {
         if let cardViewModel {
             VStack {
                 AsyncImage(url: cardViewModel.imageUrl)
-                    .frame(width: 140, height: 140)
                     .padding(.bottom, 10)
                 Text(cardViewModel.name)
                     .font(.title)
@@ -51,7 +50,7 @@ struct ProfileCardView: View {
 }
 
 #Preview {
-    ProfileCardView(cardViewModel: ProfileCardViewModel(image: "https://randomuser.me/api/portraits/med/women/12.jpg",
+    ProfileCardView(cardViewModel: ProfileCardViewModel(image: URL(string: "https://randomuser.me/api/portraits/med/women/12.jpg"),
                                                         name: "Florenece Gagne",
                                                         detail: "43, Keswick, Yukon"))
 }
